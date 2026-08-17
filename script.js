@@ -623,6 +623,42 @@ function isLikelyMobileDevice() {
   return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
 }
 
+function getMobileUpiLaunchUrl(actionUrl) {
+  const url = normalizeRazorpayPaymentActionUrl(actionUrl);
+  if (!url) return "";
+  if (/Android/i.test(navigator.userAgent || "") && /^upi:\/\/pay\?/i.test(url)) {
+    return url.replace(/^upi:\/\//i, "intent://") + "#Intent;scheme=upi;end";
+  }
+  return url;
+}
+
+function redirectToUpiPaymentApp(actionUrl) {
+  const upiUrl = normalizeRazorpayPaymentActionUrl(actionUrl);
+  if (!upiUrl) return false;
+
+  const openUrl = url => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.rel = "noreferrer";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => link.remove(), 1000);
+  };
+
+  openUrl(upiUrl);
+
+  const intentUrl = getMobileUpiLaunchUrl(upiUrl);
+  if (intentUrl && intentUrl !== upiUrl) {
+    setTimeout(() => {
+      if (document.visibilityState === "visible") {
+        window.location.href = intentUrl;
+      }
+    }, 650);
+  }
+  return true;
+}
+
 function scheduleUpiAutoRedirect() {
   if (upiAutoRedirectTimer) {
     clearTimeout(upiAutoRedirectTimer);
@@ -731,8 +767,14 @@ function renderUpiQrActions() {
 
 function renderRazorpayQrState() {
   const qrImage = document.getElementById('upiQrImage');
+  const qrTitle = document.querySelector('#upi-qr-screen .upi-qr-card h3');
+  const isDirectMobileUpi = Boolean(activeRazorpayAttempt?.isDirectUpi && isLikelyMobileDevice());
   if (qrImage && activeRazorpayAttempt?.imageUrl) {
     qrImage.src = activeRazorpayAttempt.imageUrl;
+    qrImage.hidden = isDirectMobileUpi;
+  }
+  if (qrTitle) {
+    qrTitle.textContent = isDirectMobileUpi ? "Opening UPI app" : "Scan via any UPI app";
   }
 
   renderUpiQrActions();
@@ -789,7 +831,7 @@ async function startRazorpayQrPayment() {
     if (isLikelyMobileDevice()) {
       activeRazorpayAttempt.autoRedirected = true;
       updateRazorpayQrMessage("Redirecting to UPI app", "Complete the payment in your UPI app, then return here.");
-      window.location.href = configuredUpiUrl;
+      redirectToUpiPaymentApp(configuredUpiUrl);
     }
     return true;
   }
@@ -909,7 +951,7 @@ function openRazorpayUpiAction(appName = "UPI app", app = "any") {
   }
 
   updateRazorpayQrMessage("Waiting for payment", `Complete the payment in ${appName}, then return here.`);
-  window.location.href = getUpiActionUrlForApp(actionUrl, app);
+  redirectToUpiPaymentApp(getUpiActionUrlForApp(actionUrl, app));
 }
 
 function showPaymentSuccessScreen() {
@@ -1301,6 +1343,12 @@ document.addEventListener('click', (event) => {
     event.preventDefault();
     updateRazorpayQrMessage("Checking payment", "Please wait while we verify your payment.");
     checkRazorpayPaymentStatus();
+    return;
+  }
+
+  if (event.target.closest('[data-upi-retry]')) {
+    event.preventDefault();
+    openRazorpayUpiAction("UPI app", "any");
     return;
   }
 
