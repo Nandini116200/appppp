@@ -6325,12 +6325,17 @@ button {
 .payment-primary-btn{
   width:min(100%, 340px);
   height:50px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
   border-radius:7px;
   background:#7fcdf4;
   color:#0f172a;
   font-size:15px;
   font-weight:900;
   cursor:pointer;
+  text-decoration:none;
 }
 
 .payment-primary-btn:disabled{
@@ -6664,6 +6669,9 @@ button {
 .upi-retry-btn,
 .upi-check-btn{
   min-height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   border:0;
   border-radius:8px;
   background:#0066ff;
@@ -6671,6 +6679,7 @@ button {
   font-size:12px;
   font-weight:900;
   cursor:pointer;
+  text-decoration:none;
 }
 
 .upi-retry-btn{

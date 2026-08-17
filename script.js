@@ -619,6 +619,14 @@ function getConfiguredMerchantUpiUrl(amount = getPaymentTotal()) {
   return `upi://pay?${params.toString()}`;
 }
 
+function escapeHtmlAttribute(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function isLikelyMobileDevice() {
   return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
 }
@@ -749,10 +757,15 @@ function renderUpiQrActions() {
   const actionsEl = document.getElementById('upiQrActions');
   const helpEl = document.getElementById('upiQrNextHelp');
   const redirectTextEl = document.getElementById('upiQrRedirectText');
+  const retryLinkEl = document.getElementById('upiRetryLink');
   const actionUrl = activeRazorpayAttempt?.actionUrl || "";
   const hasActionUrl = Boolean(actionUrl);
 
   if (actionsEl) actionsEl.hidden = !hasActionUrl;
+  if (retryLinkEl) {
+    retryLinkEl.href = actionUrl || "#";
+    retryLinkEl.dataset.upiUrl = actionUrl;
+  }
   if (redirectTextEl) {
     redirectTextEl.textContent = isLikelyMobileDevice()
       ? "Opening your UPI app automatically..."
@@ -795,9 +808,7 @@ function updateRazorpayQrMessage(title, message) {
   if (warningEl) warningEl.textContent = message;
 }
 
-function startDirectUpiPayment(actionUrl, amount) {
-  if (!actionUrl) return false;
-
+function prepareDirectUpiPayment(actionUrl, amount) {
   activeRazorpayAttempt = {
     attemptId: `upi-${Date.now()}`,
     imageUrl: normalizeAssetPath("images/upi-payment-qr.png"),
@@ -806,6 +817,12 @@ function startDirectUpiPayment(actionUrl, amount) {
     amount,
     isDirectUpi: true
   };
+}
+
+function startDirectUpiPayment(actionUrl, amount) {
+  if (!actionUrl) return false;
+
+  prepareDirectUpiPayment(actionUrl, amount);
   setActiveScreen('upiQr');
   return true;
 }
@@ -1123,6 +1140,11 @@ function renderPaymentMethodContent() {
   }
 
   if (selectedPaymentMethod === "upi") {
+    const upiUrl = getConfiguredMerchantUpiUrl(total);
+    const upiPayControl = upiUrl
+      ? `<a class="payment-primary-btn payment-primary-link" href="${escapeHtmlAttribute(upiUrl)}" data-upi-pay-link data-upi-url="${escapeHtmlAttribute(upiUrl)}">Pay Now</a>`
+      : `<button type="button" class="payment-primary-btn" data-upi-pay>Pay Now</button>`;
+
     content.innerHTML = `
       <h3>Pay using UPI</h3>
       <label class="payment-radio-row scan-pay-row">
@@ -1133,7 +1155,7 @@ function renderPaymentMethodContent() {
         <span>Scan & Pay</span>
       </label>
       <div class="scan-pay-box ${upiScanSelected ? "active" : ""}">
-        <button type="button" class="payment-primary-btn" data-upi-pay>Pay Now</button>
+        ${upiPayControl}
       </div>
     `;
     return;
@@ -1339,6 +1361,25 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  const upiPayLink = event.target.closest('[data-upi-pay-link]');
+  if (upiPayLink) {
+    const actionUrl = upiPayLink.dataset.upiUrl || getConfiguredMerchantUpiUrl(getPaymentTotal());
+    prepareDirectUpiPayment(actionUrl, getPaymentTotal());
+    activeRazorpayAttempt.autoRedirected = true;
+    setTimeout(() => {
+      const intentUrl = getMobileUpiLaunchUrl(actionUrl);
+      if (document.visibilityState === "visible" && intentUrl && intentUrl !== actionUrl) {
+        window.location.href = intentUrl;
+      }
+    }, 650);
+    setTimeout(() => {
+      if (document.visibilityState === "visible" && getActiveScreenName() === "paymentMode") {
+        setActiveScreen('upiQr');
+      }
+    }, 1500);
+    return;
+  }
+
   if (event.target.closest('[data-upi-check]')) {
     event.preventDefault();
     updateRazorpayQrMessage("Checking payment", "Please wait while we verify your payment.");
@@ -1347,8 +1388,13 @@ document.addEventListener('click', (event) => {
   }
 
   if (event.target.closest('[data-upi-retry]')) {
-    event.preventDefault();
-    openRazorpayUpiAction("UPI app", "any");
+    const retryUrl = event.target.closest('[data-upi-retry]')?.dataset.upiUrl || activeRazorpayAttempt?.actionUrl || "";
+    setTimeout(() => {
+      const intentUrl = getMobileUpiLaunchUrl(retryUrl);
+      if (document.visibilityState === "visible" && intentUrl && intentUrl !== retryUrl) {
+        window.location.href = intentUrl;
+      }
+    }, 650);
     return;
   }
 
