@@ -599,7 +599,7 @@ function normalizeRazorpayPaymentActionUrl(value) {
   const url = String(value || "").trim();
   if (!url) return "";
   if (/^(upi|tez|phonepe|paytmmp|gpay):\/\//i.test(url)) return url;
-  if (/^https?:\/\//i.test(url)) return url;
+  if (/^https?:\/\//i.test(url) && !/\/qr_codes\/|\/payments\/qr|api\.razorpay\.com/i.test(url)) return url;
   return "";
 }
 
@@ -785,8 +785,16 @@ async function startRazorpayQrPayment() {
   }
 
   const configuredUpiUrl = getConfiguredMerchantUpiUrl(amount);
+  if (startDirectUpiPayment(configuredUpiUrl, amount)) {
+    if (isLikelyMobileDevice()) {
+      activeRazorpayAttempt.autoRedirected = true;
+      updateRazorpayQrMessage("Redirecting to UPI app", "Complete the payment in your UPI app, then return here.");
+      window.location.href = configuredUpiUrl;
+    }
+    return true;
+  }
+
   if (!sb?.functions?.invoke) {
-    if (startDirectUpiPayment(configuredUpiUrl, amount)) return true;
     showToast("Online payment setup pending. Please choose COD for now.");
     return false;
   }
@@ -818,7 +826,7 @@ async function startRazorpayQrPayment() {
       attemptId: data.attemptId,
       qrId: data.qrId,
       imageUrl: data.imageUrl,
-      actionUrl: findRazorpayPaymentActionUrl(data) || configuredUpiUrl,
+      actionUrl: configuredUpiUrl || findRazorpayPaymentActionUrl(data),
       expiresAt: data.expiresAt,
       amount: Number(data.amount) || amount
     };
@@ -894,7 +902,7 @@ async function checkRazorpayPaymentStatus() {
 }
 
 function openRazorpayUpiAction(appName = "UPI app", app = "any") {
-  const actionUrl = activeRazorpayAttempt?.actionUrl || "";
+  const actionUrl = getConfiguredMerchantUpiUrl(activeRazorpayAttempt?.amount) || activeRazorpayAttempt?.actionUrl || "";
   if (!actionUrl) {
     showToast("Same phone payment link is not available. Please scan the QR from another device.");
     return;
