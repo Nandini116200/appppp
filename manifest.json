@@ -1,0 +1,25 @@
+{
+  "name": "JFAM",
+  "short_name": "JFAM",
+  "description": "Fresh dairy ordering and subscriptions.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8f7f4",
+  "theme_color": "#7fcdf4",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/images/login-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/login-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

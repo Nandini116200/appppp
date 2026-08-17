@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    Main frontend HTML file.
+
+    Is file me app ke saare screens markup ke form me present hain.
+    JavaScript in screens ko show/hide karta hai using `.screen.active`.
+
+    Important:
+    - Styling: `dairy-app.css`
+    - App logic: `script.js`
+    - Supabase client: `Supabase.js`
+    - Images: `inline images inside index.html/script.js`
+
+    Debugging tip:
+    Screen ka id search karo, example `home-screen`, `products-screen`, `orders-screen`.
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7fcdf4" />
+  <title>Dairy App</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/images/login-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="./dairy-app.css?v=20260623-milk-wave-clean" />
+</head>
+<body>
+  <!-- SPLASH: app open hote hi simple JFAM logo screen dikhti hai -->
+  <div class="app-splash" id="appSplash" aria-hidden="true">
+    <div class="app-splash-shell">
+      <div class="splash-logo-wrap">
+        <img src="images/login-logo.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-app">
+<!-- LOGIN: user email enter karke OTP mangta hai -->
+<main class="screen" id="login-screen" data-screen="login">
+  <div class="login-container">
+    <div class="login-art">
+  <img src="images/login-logo.png" alt="M.R Milk Logo" class="login-top-image">
+</div>
+
+    <div class="login-form-area login-email-only">
+      <label class="login-label">E-mail</label>
+      <input type="email" class="login-input" id="loginEmailInput" autocomplete="email" />
+
+      <button class="login-btn get-otp-btn" type="button">Get OTP</button>
+
+      <label class="login-policy">
+        <input type="checkbox" id="loginPolicyCheckbox" />
+        <span>
+          By continuing, you agree to our
+          <button type="button" class="login-policy-link" data-login-policy-link="terms">Terms of use</button>
+          &amp;
+          <button type="button" class="login-policy-link" data-login-policy-link="privacy">Privacy Policy</button>
+        </span>
+      </label>
+
+      <div class="login-footer">
+        <span>Don't have Account</span>
+        <button type="button" class="create-account-link">Create Account</button>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+        <!-- LOGIN SCREEN END -->
+      <!-- REGISTER: new user account create karne ka form -->
+      <main class="screen" id="register-screen" data-screen="register">
+  <div class="register-screen-wrap">
+    <div class="login-art register-art">
+      <img src="images/login-logo.png" alt="M.R Milk Logo" class="register-top-image">
+    </div>
+
+    <div class="register-card">
+      <input type="text" class="register-line-input" id="registerNameInput" placeholder="Name" autocomplete="name" />
+      <input type="text" class="register-line-input" id="registerMobileInput" placeholder="Mobile Number" inputmode="numeric" autocomplete="tel" />
+      <input type="email" class="register-line-input" id="registerEmailInput" placeholder="Email" autocomplete="email" />
+      <input type="text" class="register-line-input" id="registerDobInput" placeholder="Date of Birth" inputmode="none" autocomplete="bday" />
+    </div>
+    <button class="google-auth-btn register-google-btn" type="button" data-google-auth>
+      <span>G</span>
+      Continue with Google
+    </button>
+
+    <label class="register-policy">
+      <input type="checkbox" id="registerPolicyCheckbox" />
+      <span>
+        By proceeding , you agree to our
+        <button type="button" class="register-policy-link" data-register-policy-link="terms">Terms of use</button>
+        &amp;
+        <button type="button" class="register-policy-link" data-register-policy-link="privacy">Privacy Policy</button>
+      </span>
+    </label>
+
+    <button class="create-btn" type="button">CREATE ACCOUNT</button>
+  </div>
+</main>
+<!-- PROFILE: user details aur profile options ka main page -->
+<main class="screen" id="profile-screen" data-screen="profile">
+  <div class="login-container">
+
+    <div class="profile-heading-row">
+      <button class="icon-btn" data-go-screen="home">&lt;</button>
+      <h2>My Profile</h2>
+      <span></span>
+    </div>
+
+    <div style="background:#7fcdf4; padding:14px; border-radius:10px; margin-top:20px; color:#fff;cursor:pointer;" id="profile-card-click">
+      <strong id="profile-name">Name</strong><br>
+      <small id="profile-mobile">Mobile</small>
+    </div>
+    <div class="profile-card">
+
+      <button class="profile-option" data-go-screen="wishlist">
+  <span>💟</span>
+  <span>Wishlist</span>
+   <span id="wishlist-count" class="badge">0</span> <!-- 🔥 ADD -->
+</button>
+
+  <button class="profile-option">
+    <span>🛒</span>
+    <span>My Orders</span>
+  </button>
+
+  <button class="profile-option">
+    <span>S</span>
+    <span>My Subscriptions</span>
+  </button>
+
+  <button class="profile-option" data-go-screen="wallet">
+    <span>💼</span>
+    <span>My Wallet</span>
+  </button>
+
+   <button class="profile-option profile-option-soon" type="button" disabled>
+    <span>💳</span>
+    <span>Saved Cards</span>
+  </button>
+  <p class="coming-soon-note">This feature is coming soon</p>
+
+   <button class="profile-option">
+    <span>🪙</span>
+    <span>Saved UPI</span>
+  </button>
+
+  <button class="profile-option">
+    <span>📍</span>
+    <span>Saved Addresses</span>
+  </button>
+
+  <button class="profile-option">
+    <span>🧾</span>
+    <span>Terms Of Use</span>
+  </button>
+
+  <button class="profile-option">
+    <span>🎧</span>
+    <span>Help & Support</span>
+  </button>
+
+  <button class="profile-option" data-profile-action="privacy">
+    <span>🫆</span>
+    <span>Privacy Policy</span>
+  </button>
+
+</div>
+<div class="logout-wrap">
+  <button class="logout-btn">Log Out →</button>
+</div>
+
+  </div>
+</main>
+
+<!-- PROFILE ORDERS: user ke past/current orders yaha show hote hain -->
+<main class="screen" id="profile-orders-screen" data-screen="profileOrders">
+  <div class="profile-address-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>My Orders</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div id="profileOrdersList" class="profile-orders-list"></div>
+  </div>
+</main>
+
+<!-- PROFILE SUBSCRIPTIONS: monthly/weekly plans ki list aur filters -->
+<main class="screen" id="profile-subscriptions-screen" data-screen="profileSubscriptions">
+  <div class="profile-address-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>My Subscriptions</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div class="subscription-filter-row" role="tablist" aria-label="Subscription filters">
+      <button class="subscription-filter active" type="button" data-subscription-filter="All">All</button>
+      <button class="subscription-filter" type="button" data-subscription-filter="Monthly">Monthly</button>
+      <button class="subscription-filter" type="button" data-subscription-filter="Weekly">Weekly</button>
+      <button class="subscription-filter" type="button" data-subscription-filter="15 Days">15 Days</button>
+      <button class="subscription-filter" type="button" data-subscription-filter="Customised">Customised</button>
+    </div>
+
+    <div id="profileSubscriptionsList" class="profile-subscriptions-list"></div>
+  </div>
+</main>
+
+<!-- PRIVACY: user data aur privacy policy ka separate page -->
+<main class="screen" id="privacy-screen" data-screen="privacy">
+  <div class="terms-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-screen-back data-go-screen="profile">&lt;</button>
+      <h1>Privacy Policy</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <section class="terms-hero">
+      <p class="terms-kicker">JFAM App</p>
+      <h2>Privacy Policy</h2>
+      <p>
+        JFAM values your privacy and is committed to protecting 
+        your personal information. This Privacy Policy explains
+        how we collect, use, disclose, and safeguard your information
+        when you use the JFAM mobile application and related services.
+      </p>
+      <span>Effective Date: 2 July 2026</span>
+    </section>
+
+    <section class="terms-content">
+      <h3>1. Information We Collect</h3>
+      <p>
+       We may collect the following information:<br>
+
+      • Personal information such as your name, mobile number, email address, and delivery address.<br>
+      • Account information including login credentials and profile details.<br>
+      • Transaction information such as order history, payment details (processed securely through third-party payment providers), and invoices.<br>
+      • Device information including device model, operating system, app version, IP address, and unique device identifiers.<br>
+      • Location information (with your permission) to provide location-based services and improve deliveries.<br>
+      • Usage information such as app interactions, preferences, and error logs.
+      </p>
+
+      <h3>2. How We Use Your Information</h3>
+      <p>
+        We use your information to:<br>
+       • Create and manage your account.<br>
+       • Process and deliver your orders.<br>
+       • Provide customer support.<br>
+       • Send order updates and important notifications.<br>
+       • Improve our products and services.<br>
+       • Ensure security and prevent fraud.<br>
+       • Comply with applicable legal obligations.<br>
+      </p>
+
+      <h3>3. Sharing of Information</h3>
+      <p>
+        We do not sell your personal information. We may share your information with:<br>
+
+        • Delivery partners for order fulfillment.<br>
+        • Payment service providers for secure payment processing.<br>
+        • Technology and cloud service providers supporting our operations.<br>
+        • Government authorities when required by law.
+      </p>
+
+      <h3>4. Data Security</h3>
+      <p>
+        We implement appropriate technical and organizational 
+        measures to protect your personal information from unauthorized
+        access, loss, misuse, or disclosure.
+      </p>
+
+      <h3>5. Data Retention</h3>
+      <p>
+        We retain your personal information only as long as necessary 
+        to provide our services, comply with legal obligations, resolve
+        disputes, and enforce our agreements.
+
+      </p>
+
+      <h3>6. Your Rights</h3>
+      <p>
+        Depending on applicable laws, you may have the right to:<br>
+        • Access your personal information.<br>
+        • Correct inaccurate information.<br>
+        • Request deletion of your data.<br>
+        • Withdraw consent where applicable.<br>
+        • Contact us regarding any privacy concerns.
+      </p>
+
+      <h3>7. Permissions</h3>
+      <p>
+        The JFAM app may request access to:<br>
+
+        • Location (for delivery services)<br>
+        • Camera (for profile pictures or document uploads)<br>
+        • Storage/Photos (for uploading images)<br>
+        • Notifications (for order updates)
+
+      These permissions are requested only when necessary for app functionality.
+      </p>
+
+      <h3>8. Children's Privacy</h3>
+      <p>
+        We may update this Privacy Policy from time to time. 
+        Any changes will be posted within the app and on our website 
+        with an updated effective date.
+      </p>
+
+       <h3>9. Changes to This Privacy Policy</h3>
+      <p>
+        We may update this Privacy Policy from time to time. 
+        Any changes will be posted within the app and on our website 
+        with an updated effective date.
+      </p>
+
+      <h3>10. Contact Us</h3>
+      <p>
+        If you have any questions regarding this Privacy Policy, 
+        please contact us at: <h5>+91 72309 20774 / jfamown@gmail.com </h5>
+
+      </p>
+      <p class="terms-note">
+        This policy is written for customer understanding and app usage clarity.
+        For serious legal or payment matters, verified business records and
+        applicable law will guide the final decision.
+      </p>
+    </section>
+  </div>
+</main>
+
+<!-- TERMS: app ke terms and conditions text -->
+<main class="screen" id="terms-screen" data-screen="terms">
+  <div class="terms-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>Terms Of Use</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <section class="terms-hero">
+      <p class="terms-kicker">JFAM App</p>
+      <h2>Terms & Conditions</h2>
+      <p>
+        Please read these Terms of Use carefully before using the JFAM app.
+        By creating an account, browsing products, placing an order, managing a
+        subscription, or using any payment option in the app, you agree to follow
+        these terms.
+      </p>
+      <span>Last updated: 2 July 2026</span>
+    </section>
+
+    <section class="terms-content">
+      <h3>1. About The App</h3>
+      <p>
+        JFAM is a dairy delivery app created to make daily milk and dairy
+        product ordering simple, transparent, and convenient for customers. The
+        app may allow users to create a profile, save delivery addresses, add
+        products to the cart, manage a wishlist, place one-time orders, choose
+        payment methods, and view wallet or order-related details.
+      </p>
+      <p>
+        These terms apply to every feature, screen, service, content, product
+        listing, offer, and delivery option available inside the app. If you do
+        not agree with these terms, you should stop using the app and avoid
+        placing orders through it.
+      </p>
+
+      <h3>2. Account Registration</h3>
+      <p>
+        To use important features such as profile, wallet, orders, saved
+        addresses, checkout, and subscriptions, you may need to create an account
+        using your name, mobile number, email address, and other required details.
+        You are responsible for keeping your account details accurate and updated.
+      </p>
+      <p>
+        The mobile number or email used during registration may be used for OTP
+        verification, delivery communication, order updates, payment messages,
+        support conversations, and account-related notifications. You agree that
+        the details provided by you are correct and belong to you.
+      </p>
+
+      <h3>3. User Responsibility</h3>
+      <p>
+        You agree to use the app only for lawful and personal purposes. You must
+        not misuse the app, create fake accounts, enter false delivery details,
+        attempt payment fraud, disturb delivery staff, copy app content, or use
+        the service in a way that harms the business, other users, or the
+        platform.
+      </p>
+      <p>
+        You are responsible for all orders, subscriptions, address changes,
+        payment selections, and profile updates made from your account. If you
+        suspect any unauthorized use of your account, you should contact support
+        as soon as possible.
+      </p>
+
+      <h3>4. Products, Pricing & Availability</h3>
+      <p>
+        Product names, images, descriptions, pack sizes, prices, and availability
+        shown in the app are provided for customer convenience. We try to keep all
+        information accurate, but product availability can change due to stock,
+        supply, season, delivery area, or operational reasons.
+      </p>
+      <p>
+        Prices may change from time to time without prior notice. The final price
+        shown at checkout, including product total, delivery charges, wallet
+        adjustments, cash on delivery fees, or applicable discounts, will be the
+        amount considered for your order.
+      </p>
+
+      <h3>5. Orders & Checkout</h3>
+      <p>
+        When you place an order through the app, you confirm that you want to buy
+        the selected products at the displayed price and deliver them to the
+        selected address. An order may be accepted, modified, delayed, or
+        cancelled due to product unavailability, address issues, payment failure,
+        weather, delivery route limits, or other practical reasons.
+      </p>
+      <p>
+        You should review your cart, quantity, address, contact details, and
+        payment method before confirming the order. Once an order is confirmed,
+        changes may not always be possible if packing or delivery has already
+        started.
+      </p>
+
+      <h3>6. Subscriptions & Pause Feature</h3>
+      <p>
+        The app may provide subscription plans for regular milk or dairy
+        deliveries. Subscription quantity, delivery days, pause options, start
+        date, and other preferences must be selected carefully by the user.
+      </p>
+      <p>
+        If a pause feature is available, you should pause the subscription before
+        the cut-off time shown or followed by the service. Late pause requests may
+        not apply to already prepared or dispatched deliveries. Subscription
+        plans may be adjusted when there are supply changes, price updates, or
+        delivery limitations.
+      </p>
+
+      <h3>7. Delivery Terms</h3>
+      <p>
+        Delivery is available only in supported areas and pin codes. You must
+        provide a complete and accurate address including house number, street,
+        locality, city, state, and mobile number. Incomplete or incorrect address
+        details may lead to failed or delayed delivery.
+      </p>
+      <p>
+        Delivery timing may vary due to traffic, weather, product preparation,
+        staff availability, local restrictions, or other circumstances. If the
+        customer is unavailable at the delivery location, the order may be marked
+        as attempted, delayed, or cancelled according to the situation.
+      </p>
+
+      <h3>8. Payments, Wallet & Charges</h3>
+      <p>
+        The app may support payment methods such as cash on delivery, UPI,
+        cards, wallet balance, or other available payment options. You agree to
+        provide valid payment details and complete payment for every confirmed
+        order.
+      </p>
+      <p>
+        Cash on delivery may include an additional fee if shown at checkout.
+        Wallet balance, rewards, or app credits may be subject to usage limits,
+        expiry rules, refunds, and internal verification. Failed, pending, or
+        duplicate payments will be reviewed according to payment gateway records
+        and business policies.
+      </p>
+
+      <h3>9. Cancellations, Refunds & Replacements</h3>
+      <p>
+        Cancellation, refund, or replacement requests are handled based on order
+        status, product condition, delivery status, and the nature of the issue.
+        Fresh dairy products are perishable, so cancellation may not be possible
+        once the product has been packed, dispatched, or delivered.
+      </p>
+      <p>
+        If you receive a wrong, damaged, expired, leaking, or quality-affected
+        item, you should report it quickly with clear details. Approved refunds
+        may be issued to the original payment method, wallet, or another suitable
+        mode depending on the case.
+      </p>
+
+      <h3>10. Offers, Discounts & Rewards</h3>
+      <p>
+        Offers, coupon codes, wallet benefits, rewards, and discounts may be
+        introduced, changed, or removed at any time. Offers may have conditions
+        such as minimum order value, product restrictions, one-time use, expiry
+        date, or area-based availability.
+      </p>
+      <p>
+        Misuse of offers, repeated fake accounts, referral abuse, or any attempt
+        to gain unfair benefit may lead to cancellation of rewards, order
+        cancellation, wallet adjustment, or account restriction.
+      </p>
+
+      <h3>11. Privacy & Data Use</h3>
+      <p>
+        The app may collect details such as name, mobile number, email, address,
+        order history, payment status, cart activity, wishlist items, and support
+        messages to provide and improve the service. Your information is used for
+        account management, delivery, customer support, payment processing,
+        safety checks, and service updates.
+      </p>
+      <p>
+        We aim to handle user data responsibly. However, users should also avoid
+        sharing OTPs, payment passwords, card PINs, or sensitive account details
+        with anyone. M.R Milk will not ask for your confidential banking PIN or
+        password inside normal support conversations.
+      </p>
+
+      <h3>12. App Content & Intellectual Property</h3>
+      <p>
+        The app design, logo, product content, text, images, icons, layout,
+        graphics, features, and software-related elements belong to JFAM or
+        its respective owners. You may use the app only for personal ordering and
+        service-related purposes.
+      </p>
+      <p>
+        You must not copy, modify, sell, distribute, reverse engineer, scrape, or
+        misuse any part of the app or its content without written permission.
+      </p>
+
+      <h3>13. Service Changes & Account Restriction</h3>
+      <p>
+        JFAM may update app features, change product categories, revise
+        delivery rules, add new payment options, remove unavailable services, or
+        improve the user experience at any time. Some features may be temporarily
+        unavailable during maintenance or technical issues.
+      </p>
+      <p>
+        We may restrict, suspend, or close an account if there is fraud, abusive
+        behavior, payment misuse, repeated fake orders, violation of these terms,
+        or activity that creates operational risk for the service.
+      </p>
+
+      <h3>14. Limitation Of Liability</h3>
+      <p>
+        The app is provided to make ordering easier, but we do not guarantee that
+        it will always be uninterrupted, error-free, or available on every device.
+        JFAM will not be responsible for losses caused by network issues,
+        user mistakes, incorrect information entered by the user, payment gateway
+        downtime, device problems, or circumstances beyond reasonable control.
+      </p>
+
+      <h3>15. Updates To These Terms</h3>
+      <p>
+        These Terms of Use may be updated whenever the app, business process,
+        payment rules, delivery policy, or legal requirements change. The updated
+        version will apply from the date it is posted in the app. Continued use
+        of the app after updates means you accept the revised terms.
+      </p>
+
+      <h3>16. Contact & Support</h3>
+      <p>
+        For order issues, payment concerns, delivery questions, account help, or
+        product feedback, you can contact JFAM support through the Help &
+        Support option available in the profile section or any official support
+        channel provided by the business.
+      </p>
+      <p class="terms-note">
+        These terms are written for app usage clarity and customer understanding.
+        For any serious legal, payment, or regulatory matter, the final decision
+        will be based on applicable law, business records, and verified order or
+        payment information.
+      </p>
+    </section>
+  </div>
+</main>
+
+<!-- HELP SUPPORT: customer care info aur help topics -->
+<main class="screen" id="help-support-screen" data-screen="helpSupport">
+  <div class="support-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>Help & Support</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <section class="support-hero">
+      <p class="support-kicker">Customer Care</p>
+      <h2>We are here to help</h2>
+      <p>
+        If you are facing any issue with the JFAM app, your order, product
+        quality, delivery, payment, wallet, subscription, or account, this page
+        will guide you on how to contact support and what details to share for a
+        faster solution.
+      </p>
+    </section>
+
+    <section class="support-contact-grid">
+      <div class="support-contact-card">
+        <span>Phone</span>
+        <strong>+91 72309 20774</strong>
+        <p>Call for urgent delivery, order, or product issues.</p>
+      </div>
+      <div class="support-contact-card">
+        <span>Email</span>
+        <strong>Jfamown@gmail.com</strong>
+        <p>Send screenshots, payment proof, or detailed complaints.</p>
+      </div>
+      <div class="support-contact-card">
+        <span>Support Hours</span>
+        <strong>7:00 AM - 6:00 PM</strong>
+        <p>Available all days for app and delivery assistance.</p>
+      </div>
+    </section>
+
+    <section class="support-content">
+      <h3>1. App Related Help</h3>
+      <p>
+        If the app is not opening, a screen is not loading, buttons are not
+        working, cart items are not updating, wishlist is not showing correctly,
+        or profile details are not visible, please refresh the app and check your
+        internet connection first. If the problem continues, contact support with
+        your registered mobile number, device name, and a screenshot of the issue.
+      </p>
+      <p>
+        App problems can sometimes happen because of slow internet, old cached
+        data, browser settings, or temporary service maintenance. Our support
+        team will check the issue and guide you with steps such as updating
+        details, clearing old data, retrying login, or confirming whether the
+        issue is from the server side.
+      </p>
+
+      <h3>2. Product Quality Complaints</h3>
+      <p>
+        JFAM aims to deliver fresh dairy products, but if you receive a
+        product that seems damaged, leaking, spoiled, expired, wrongly packed, or
+        different from what you ordered, please report it as soon as possible.
+        Mention the product name, quantity, delivery date, order details, and
+        attach a clear photo if available.
+      </p>
+      <p>
+        Product quality complaints are reviewed carefully because dairy items are
+        fresh and perishable. After checking your complaint, the team may offer a
+        replacement, refund, wallet adjustment, or another suitable resolution
+        based on the issue and order record.
+      </p>
+
+      <h3>3. Order & Cart Issues</h3>
+      <p>
+        If your order is not confirmed, the cart total looks wrong, quantity is
+        not updating, an item is missing from the cart, or you accidentally placed
+        the wrong order, contact support quickly. Share the product names,
+        quantity, selected address, payment mode, and the approximate time when
+        the issue happened.
+      </p>
+      <p>
+        Orders may not be editable after packing or dispatch starts. Still, our
+        team will try to help with possible changes, cancellation guidance, or
+        correction of order details wherever operationally possible.
+      </p>
+
+      <h3>4. Delivery Support</h3>
+      <p>
+        For late delivery, failed delivery, wrong address, unavailable delivery
+        person, missing products, or delivery marked incorrectly, please contact
+        customer care with your registered mobile number and complete delivery
+        address. You should also mention whether the delivery was prepaid or cash
+        on delivery.
+      </p>
+      <p>
+        Delivery timing may be affected by traffic, weather, product preparation,
+        staff availability, route changes, or local restrictions. Support will
+        coordinate with the delivery team and update you with the best available
+        solution.
+      </p>
+
+      <h3>5. Payment, Wallet & Refund Help</h3>
+      <p>
+        If your payment is deducted but the order is not confirmed, UPI payment
+        is pending, card payment failed, wallet balance is not updated, or refund
+        is not visible, please share the payment method, transaction ID, payment
+        screenshot, date, time, and registered mobile number.
+      </p>
+      <p>
+        Payment issues are checked using order records and payment gateway
+        status. Refunds may take some time depending on the payment provider,
+        bank, or wallet process. Duplicate or failed payments will be reviewed
+        and resolved after verification.
+      </p>
+
+      <h3>6. Subscription & Pause Help</h3>
+      <p>
+        If you are using a milk subscription and want help with start date,
+        quantity, delivery days, pause request, product change, or subscription
+        cancellation, contact support before the daily cut-off time. Late requests
+        may not apply to deliveries already prepared or sent for delivery.
+      </p>
+      <p>
+        For subscription support, always share your registered mobile number,
+        product name, current quantity, required change, and date from which you
+        want the change to apply. This helps the team update your plan correctly.
+      </p>
+
+      <h3>7. Account & Profile Help</h3>
+      <p>
+        If you are unable to login, OTP is not received, profile information is
+        wrong, saved addresses are missing, or you want to update your mobile
+        number or email, support can help after basic verification. Please do not
+        share OTPs, card PINs, UPI PINs, or passwords with anyone.
+      </p>
+      <p>
+        For account safety, some changes may require confirmation from your
+        registered mobile number or email. This is done to protect your profile,
+        wallet, order history, and delivery details from unauthorized access.
+      </p>
+
+      <h3>8. What Details To Share</h3>
+      <p>
+        To get faster help, please share your registered mobile number, order
+        date, product name, delivery address, payment method, screenshot if
+        available, and a short explanation of the issue. Clear details help the
+        support team find your order and solve the problem quickly.
+      </p>
+      <p>
+        If your issue is urgent, call customer care. If your issue needs photos,
+        payment proof, or longer explanation, email support is usually better.
+        Please avoid sending repeated complaints for the same issue because it may
+        slow down the review process.
+      </p>
+
+      <h3>9. Expected Response</h3>
+      <p>
+        Most common issues are checked during support hours. Simple account or
+        app questions may be resolved quickly, while payment verification,
+        product quality review, refund processing, or delivery investigation may
+        take longer depending on the case.
+      </p>
+      <p class="support-note">
+        Our goal is to keep your dairy delivery experience smooth, fresh, and
+        reliable. If something goes wrong, share the correct details and the JFAM
+        support team will help you with the most suitable solution.
+      </p>
+    </section>
+  </div>
+</main>
+
+<!-- SAVED CARDS: future card saving screen -->
+<main class="screen" id="profile-cards-screen" data-screen="profileCards">
+  <div class="profile-address-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>Saved Cards</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <button type="button" id="profileAddCardBtn" class="profile-add-address-btn">
+      + ADD NEW CARD
+    </button>
+
+    <div id="profileCardFormWrap" class="profile-address-form-wrap">
+      <div class="address-form">
+        <h3>CARD DETAILS</h3>
+        <input type="text" id="profileCardHolder" placeholder="Name on Card*" maxlength="40" autocomplete="off">
+        <input type="text" id="profileCardNumber" placeholder="Card Number*" maxlength="23" inputmode="numeric" autocomplete="off">
+        <div class="address-row">
+          <input type="text" id="profileCardExpiry" placeholder="MM/YY*" maxlength="5" inputmode="numeric" autocomplete="off">
+          <input type="text" id="profileCardLabel" placeholder="Card Label" maxlength="24" autocomplete="off">
+        </div>
+        <div class="address-actions">
+          <button type="button" id="profileCancelCardBtn">Cancel</button>
+          <button type="button" id="profileSaveCardBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="profileCardList"></div>
+  </div>
+</main>
+
+<!-- SAVED UPI: user ke saved UPI IDs manage karne ka page -->
+<main class="screen" id="profile-upi-screen" data-screen="profileUpi">
+  <div class="profile-address-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>Saved UPI</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <button type="button" id="profileAddUpiBtn" class="profile-add-address-btn">
+      + ADD NEW UPI
+    </button>
+
+    <div id="profileUpiFormWrap" class="profile-address-form-wrap">
+      <div class="address-form">
+        <h3>UPI DETAILS</h3>
+        <input type="text" id="profileUpiId" placeholder="UPI ID*" maxlength="50" autocomplete="off">
+        <input type="text" id="profileUpiLabel" placeholder="Account Label" maxlength="30" autocomplete="off">
+        <div class="address-actions">
+          <button type="button" id="profileCancelUpiBtn">Cancel</button>
+          <button type="button" id="profileSaveUpiBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="profileUpiList"></div>
+  </div>
+</main>
+
+<!-- SAVED ADDRESSES: profile se delivery addresses add/edit/remove -->
+<main class="screen" id="profile-addresses-screen" data-screen="profileAddresses">
+  <div class="profile-address-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">&lt;</button>
+      <h1>Saved Addresses</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <button type="button" id="profileAddAddressBtn" class="profile-add-address-btn">
+      + ADD NEW ADDRESS
+    </button>
+
+    <div id="profileAddressFormWrap" class="profile-address-form-wrap">
+      <div class="address-form">
+        <p class="deliverable-note">DELIVERABLE IN PILANI i.e. (333031 ONLY)</p>
+        <h3>CONTACT DETAILS</h3>
+        <input type="text" id="profileAddressName" placeholder="Name*" maxlength="40" autocomplete="off">
+        <input type="tel" id="profileAddressMobile" placeholder="Mobile No*" maxlength="10" inputmode="numeric" autocomplete="off">
+
+        <div class="address-heading-row">
+          <h3>ADDRESS</h3>
+          <button type="button" class="address-map-btn" data-address-map-prefix="profileAddress" title="Open and verify this address on map">📍</button>
+        </div>
+        <input type="text" id="profileAddressPincode" value="333031" readonly style="background:#f0f0f0;color:#555;">
+        <input type="text" id="profileAddressHouse" placeholder="House Number/Tower/Block*">
+        <input type="text" id="profileAddressStreet" placeholder="Address (locality, building, street)*">
+        <input type="text" id="profileAddressTown" placeholder="Locality / Town*">
+        <p class="address-map-note" data-address-map-note="profileAddress">Select on the map for more exact information</p>
+
+        <div class="city-state-row">
+          <input type="text" id="profileAddressCity" value="Pilani" readonly style="background:#f0f0f0;color:#555;">
+          <input type="text" id="profileAddressState" value="Rajasthan" readonly style="background:#f0f0f0;color:#555;">
+        </div>
+
+        <div class="address-btn-row">
+          <button type="button" id="profileCancelAddressBtn">Cancel</button>
+          <button type="button" id="profileSaveAddressBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="profileAddressList"></div>
+  </div>
+</main>
+
+<!-- WALLET: MilkCash balance aur wallet options -->
+<main class="screen" id="wallet-screen" data-screen="wallet">
+  <div class="login-container">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="profile">←</button>
+      <h1>My Wallet</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <!-- BALANCE CARD -->
+    <div class="wallet-card">
+      <div class="wallet-card-copy">
+        <p>JFAM MilkCash</p>
+        <h2 id="walletBalanceAmount">₹0</h2>
+        <span>Subscription credits and wallet adjustments</span>
+      </div>
+      <div class="wallet-card-art" aria-hidden="true">
+        <div class="wallet-cash-note">JFAM</div>
+        <span class="wallet-coin coin-one">₹</span>
+        <span class="wallet-coin coin-two">₹</span>
+        <span class="wallet-coin coin-three">₹</span>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <button class="wallet-option" type="button" data-go-screen="walletTransactions">
+      <span>📄</span>
+      <span>Transactions</span>
+    </button>
+
+  </div>
+</main>
+
+<!-- WALLET TRANSACTIONS: user-specific billing and wallet ledger -->
+<main class="screen" id="wallet-transactions-screen" data-screen="walletTransactions">
+  <div class="login-container">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="wallet">←</button>
+      <h1>Transactions</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div id="walletTransactionsList" class="wallet-transactions-list"></div>
+  </div>
+</main>
+
+<!-- ADD MONEY: wallet recharge amount and payment method selection -->
+<main class="screen" id="addmoney-screen" data-screen="addmoney">
+  <div class="login-container">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="wallet">←</button>
+      <h1>My Wallet</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <!-- RECHARGE PACKS -->
+    <h3 style="margin-top:20px;">Popular Recharge Packs</h3>
+
+    <div class="recharge-grid">
+      <div class="recharge-card" data-amount="500">₹ 500</div>
+<div class="recharge-card" data-amount="1000">₹ 1000</div>
+<div class="recharge-card" data-amount="1500">₹ 1500</div>
+<div class="recharge-card" data-amount="2000">₹ 2000</div>
+    </div>
+
+    <!-- BOTTOM INPUT -->
+    <div class="addmoney-bottom">
+      <input type="number" placeholder="Enter Amount" class="amount-input">
+    </div>
+
+    <!-- PAYMENT METHODS -->
+    <h3 style="margin-top:20px;">Payments Methods</h3>
+
+    <div class="payment-box">
+      <div class="payment-grid">
+
+  <div class="payment-card active">UPI</div>
+  <div class="payment-card">Card</div>
+  <div class="payment-card">Net Banking</div>
+
+</div>
+    </div>
+    <div class="upi-row" style="display:flex;">
+  <input type="text" placeholder="Enter UPI ID" class="upi-input" maxlength="30">
+  <button class="upi-pay-btn">Pay</button>
+</div>
+<div class="card-form" style="display:none;">
+
+  <input type="text" placeholder="Card Number" class="card-input card-number">
+
+  <input type="text" placeholder="Name on card" class="card-input name-input">
+
+  <div class="card-row">
+    <input type="text" placeholder="MM/YY" class="card-input expiry-input">
+    <input type="text" placeholder="CVV" class="card-input cvv-input">
+  </div>
+
+  <button class="card-pay-btn">Pay Now</button>
+
+</div>
+
+
+  </div>
+</main>
+<!-- EDIT PROFILE: user name/mobile update karne ka form -->
+<main class="screen" id="edit-profile-screen" data-screen="editProfile">
+  <div class="edit-profile-shell">
+    
+    <header class="edit-profile-head">
+      <button type="button" class="edit-profile-back" data-screen-back aria-label="Back">
+        <svg viewBox="0  0 24 24" aria-hidden="true">
+          <path d="M15 5 8 12l7 7"></path>
+        </svg>
+      </button>
+      <div>
+        <span>Edit Profile</span>
+        
+      </div>
+    </header>
+
+    <div class="edit-profile-avatar" aria-hidden="true">
+      <span class="avatar-head"></span>
+      <span class="avatar-body"></span>
+    </div>
+
+    <section class="edit-profile-form" aria-label="Edit profile form">
+      <label class="edit-profile-field" for="edit-name">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
+          <path d="M4 21a8 8 0 0 1 16 0"></path>
+        </svg>
+        <span>
+          <small>Name</small>
+          <input type="text" id="edit-name" />
+        </span>
+      </label>
+
+      <label class="edit-profile-field" for="edit-email">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16v12H4z"></path>
+          <path d="m4 7 8 6 8-6"></path>
+        </svg>
+        <span>
+          <small>Email</small>
+          <input type="email" id="edit-email" />
+        </span>
+      </label>
+
+      <label class="edit-profile-field" for="edit-mobile">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3h10v18H7z"></path>
+          <path d="M11 18h2"></path>
+        </svg>
+        <span>
+          <small>Mobile Number</small>
+          <input type="text" id="edit-mobile" />
+        </span>
+      </label>
+    </section>
+
+    <button class="update-btn">Update profile</button>
+  </div>
+</main>
+
+<!-- ? OTP SCREEN YAHA ADD KARO -->
+<!-- OTP: email par aaye OTP ko verify karne ka screen -->
+<main class="screen" id="otp-screen" data-screen="otp">
+  <div class="login-container">
+
+    <div class="login-art">
+      <img src="images/login-logo.png" class="login-top-image">
+    </div>
+
+    <div class="login-form-area">
+      <label class="login-label">Enter OTP</label>
+      <div class="otp-boxes-container">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="0" />
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="1" />
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="2" />
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="3" />
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="4" />
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="5" />
+      </div>
+
+      <div class="otp-resend-timer">Resend OTP in 15 seconds</div>
+      <button class="login-btn resend-otp-btn" disabled>Resend OTP</button>
+
+      <p class="login-policy">
+        By clicking Get OTP , you agree to our Terms of use & Privacy Policy
+      </p>
+
+      <div class="login-footer">
+        <span>Don't have Account</span>
+        <button class="create-account-link">Create Account</button>
+      </div>
+
+    </div>
+  </div>
+</main>
+<!-- LOGIN/REGISTER SUCCESS: account ya login success message -->
+<main class="screen" id="success-screen" data-screen="success">
+  <div class="login-container" style="text-align:center; padding-top:80px;">
+
+    <img src="images/login-logo.png" class="login-top-image">
+
+    <div style="margin-top:60px;">
+      <div class="success-tick">
+      <span class="tick-mark">✔</span>
+ 
+</div>
+      <h1 class="success-sub">Log In</h1>
+<h1 class="success-main">Successfully!!!</h1>
+    </div>
+
+  </div>
+</main>
+<!-- PROFILE SUCCESS: profile update ke baad success message -->
+<main class="screen" id="profile-success-screen" data-screen="profileSuccess">
+  <div class="login-container" style="text-align:center; padding-top:80px;">
+
+    <div style="margin-top:60px;">
+      <div class="success-tick">
+        <span class="tick-mark">✔</span>
+      </div>
+
+      <h1 class="success-sub">Profile Updated</h1>
+      <h1 class="success-main">Successfully!!!</h1>
+    </div>
+
+  </div>
+</main>
+
+<!-- CART SUCCESS: product cart me add hone ke baad message -->
+<main class="screen" id="cart-success-screen" data-screen="cartSuccess">
+  <div class="login-container" style="text-align:center; padding-top:80px;">
+
+    <div style="margin-top:60px;">
+      <div class="success-tick">
+        <span class="tick-mark">✔</span>
+      </div>
+
+      <h1 class="success-sub">Added to Cart</h1>
+      <h1 class="success-main">Successfully!!!</h1>
+    </div>
+
+  </div>
+</main>
+
+<!-- HOME SCREEN START -->
+<!-- HOME: welcome bar, banners, subscription plans, categories, featured products -->
+<main class="screen active" id="home-screen" data-screen="home">
+    <header class="home-topbar">
+  <button class="login-brand" type="button" data-go-screen="profile" aria-label="Open profile">
+  <span class="brand-icon">👤</span>
+  <h1 id="nav-user">Log In</h1> <!-- 🔥 ID add -->
+</button>
+  <div class="home-actions">
+    <button class="icon-btn" data-go-screen="wallet">💸</button>
+    <button class="icon-btn" aria-label="Notifications">🔔</button>
+    <button class="icon-btn notification-nav-btn" data-go-screen="notifications" aria-label="Notifications">
+     🔔
+      <span id="notification-count" class="badge small-badge">0</span>
+    </button>
+    <button class="icon-btn wishlist-nav-btn" data-go-screen="wishlist">
+  💟
+  <span id="wishlist-count-nav" class="badge small-badge">0</span>
+</button>
+    
+  </div>
+</header>
+
+<!-- HOME BANNER: top promotional image slider/banner -->
+<section class="hero-banner">
+  <img id="heroImage" src="images/Banner 1.png">
+  <div class="hero-overlay"></div>
+</section>
+
+<!-- DAILY DELIVERY CARD: active subscription products ka daily summary -->
+<section class="daily-delivery-card" id="dailyDeliveryCard" hidden>
+  <div class="daily-delivery-head">
+    <span id="dailyDeliveryDate"></span>
+    <button type="button" id="dailyAddItemsBtn">Add Items</button>
+  </div>
+  <p class="daily-delivery-status" id="dailyDeliveryStatus"></p>
+  <h3 id="dailyDeliveryTitle">Your Subscribed Products</h3>
+  <div class="daily-product-carousel">
+    <button class="daily-carousel-btn" type="button" data-daily-scroll="left" aria-label="Previous subscribed products">&lt;</button>
+    <div class="daily-product-list" id="dailyProductList"></div>
+    <button class="daily-carousel-btn" type="button" data-daily-scroll="right" aria-label="Next subscribed products">&gt;</button>
+  </div>
+</section>
+
+<!-- SUBSCRIPTION PLANS SECTION: monthly/15 days/weekly/custom plan buttons -->
+<section class="home-section">
+  <div class="section-head">
+    <h3>SUBSCRIPTION PLANS</h3>
+    <button class="section-link" type="button" data-go-screen="products"></button>
+  </div>
+  <div class="subscription-list">
+    <article class="mini-plan-card sky-card">
+      <div class="mini-icon">📅</div>
+      <h4>30 Days<br>Subscription<br>Plan</h4>
+    </article>
+    <article class="mini-plan-card sky-card">
+      <div class="mini-icon">🗓️</div>
+      <h4>15 Days<br>Subscription<br>Plan</h4>
+    </article>
+    <article class="mini-plan-card sky-card">
+      <div class="mini-icon">📆</div>
+      <h4>7 Days<br>Subscription<br>Plan</h4>
+    </article>
+  </div>
+  <button class="custom-plan-banner" type="button">⚙️&nbsp; Customised Subscription Plan</button>
+</section>
+
+<!-- PRODUCT CATEGORIES SECTION: Milk, Chaach, Ghee, Dahi, Paneer shortcuts -->
+<section class="home-section bordered-section">
+  <div class="section-head">
+    <h3>PRODUCTS CATEGORIES</h3>
+    <button class="section-link" type="button" data-go-screen="products"></button>
+  </div>
+  <div class="category-circles">
+    <button class="category-chip blue-ring" data-go-screen="products" data-category="milk">
+      <span>
+        <img src="images/category_milk.png" alt="Milk">
+      </span>
+      <small>MILK</small></button>
+    <button class="category-chip blue-ring" data-go-screen="products" data-category="chaach">
+      <span>
+        <img src="images/category_chaach.png" alt="Chaach">
+      </span>
+      <small>CHAACH</small></button>
+    <button class="category-chip yellow-ring" data-go-screen="products" data-category="ghee">
+      <span>
+        <img src="images/category_ghee.png" alt="Ghee">
+    </span>
+    <small>GHEE</small></button>
+    <button class="category-chip green-ring" data-go-screen="products" data-category="dahi">
+      <span>
+        <img src="images/Dahi.png" alt="Dahi">
+      </span>
+      <small>DAHI</small></button>
+    <button class="category-chip pink-ring" data-go-screen="products" data-category="paneer">
+      <span>
+        <img src="images/Paneer.png" alt="Paneer">
+      </span>
+      <small>PANEER</small></button>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS SECTION: home par highlighted product cards -->
+<section class="home-section bordered-section featured-section">
+  <div class="section-head">
+    <h3>FEATURED PRODUCTS</h3>
+    <button class="section-link" type="button" data-go-screen="products"></button>
+  </div>
+
+  <div class="featured-list">
+
+  <article class="featured-card milk-card" data-name="RAW COW MILK">
+
+  <!-- NORMAL VIEW -->
+  <div class="featured-visual normal-view">
+    <img src="images/Milk.png">
+    <!-- 🔥 ADD THIS -->
+  <span class="wishlist-heart">♡</span>
+  </div>
+</article>
+
+  <article class="featured-card chaach-card" data-name="BUFFALO BILONA CHAACH">
+    <div class="featured-visual">
+      <img src="images/Chaach.png">
+      <!-- 🔥 ADD THIS -->
+      <span class="wishlist-heart">♡</span>
+    </div>
+  </article>
+
+  <article class="featured-card ghee-card" data-name="RAW A2 COW GHEE">
+    <div class="featured-visual">
+      <img src="images/Ghee.png">
+      <!-- 🔥 ADD THIS -->
+      <span class="wishlist-heart">♡</span>
+    </div>
+  </article>
+
+  <article class="featured-card dahi-card" data-name="DAHI">
+    <div class="featured-visual">
+      <img src="images/Dahi.png">
+      <!-- 🔥 ADD THIS -->
+      <span class="wishlist-heart">♡</span>
+    </div>
+  </article>
+  
+
+  <article class="featured-card paneer-card" data-name="PANEER">
+    <div class="featured-visual">
+      <img src="images/Paneer.png">
+      <!-- 🔥 ADD THIS -->
+      <span class="wishlist-heart">♡</span>
+    </div>
+  </article>
+  </div>
+  <div class="design-footer">
+  <img src="images/DESIGN END.png">
+</div>
+
+</section>
+</main>
+
+<!-- NOTIFICATIONS: cart/wishlist/subscription reminders ki list -->
+<main class="screen" id="notifications-screen" data-screen="notifications">
+  <div class="notifications-shell">
+    <div class="topbar">
+      <button class="icon-btn" data-go-screen="home">&lt;</button>
+      <h1>Notifications</h1>
+      <div class="topbar-spacer"></div>
+    </div>
+    <div id="notificationsList" class="notifications-list"></div>
+  </div>
+</main>
+
+<!-- PLANS: subscription plan cards and plan details -->
+<main class="screen" id="plans-screen" data-screen="plans">
+      <header class="topbar">
+        <button class="icon-btn" aria-label="Go back" data-go-screen="home">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19 8.5 12l7-7"/></svg>
+        </button>
+        <h1>Subscription Plans</h1>
+        <span class="topbar-spacer" aria-hidden="true"></span>
+      </header>
+
+      <section class="hero-card">
+        <div class="hero-cow">🐄</div>
+        <h2>Choose Your Plan</h2>
+        <p>Fresh dairy delivered to your door daily</p>
+      </section>
+
+      <section class="plans-wrap">
+        <article class="plan-card selected">
+          <div class="plan-icon sky">📅</div>
+          <div class="plan-content">
+            <h3>30 Days Plan</h3>
+            <p>Stable daily delivery with maximum flexibility</p>
+            <span>Pause up to 7 days</span>
+          </div>
+          <button class="radio-pill selected" aria-label="Selected monthly plan"></button>
+        </article>
+
+        <article class="plan-card">
+          <div class="plan-icon sky">🗓️</div>
+          <div class="plan-content">
+            <h3>15 Days Plan</h3>
+            <p>Balanced two-week plan for regular needs</p>
+            <span>Pause up to 3 days</span>
+          </div>
+          <button class="radio-pill" aria-label="Choose 15 days plan"></button>
+        </article>
+
+        <article class="plan-card">
+          <div class="plan-icon mint">📆</div>
+          <div class="plan-content">
+            <h3>7 Days Plan</h3>
+            <p>Short trial plan with low commitment</p>
+            <span>Pause allowed 1 day</span>
+          </div>
+          <button class="radio-pill" aria-label="Choose weekly plan"></button>
+        </article>
+
+        <article class="custom-card">
+          <h3><span>⚙️</span> Customised Plan</h3>
+          <div class="quantity-row">
+            <span>Quantity (litres/day)</span>
+            <div class="counter">
+              <button type="button" class="circle-action minus-btn">-</button>
+              <strong id="quantity-value">1</strong>
+              <button type="button" class="circle-action plus-btn">+</button>
+            </div>
+          </div>
+          <div class="days-label">Delivery Days</div>
+          <div class="day-pills">
+            <button type="button" class="day-pill active">Mon</button>
+            <button type="button" class="day-pill active">Tue</button>
+            <button type="button" class="day-pill active">Wed</button>
+            <button type="button" class="day-pill active">Thu</button>
+            <button type="button" class="day-pill active">Fri</button>
+            <button type="button" class="day-pill">Sat</button>
+            <button type="button" class="day-pill">Sun</button>
+          </div>
+        </article>
+      </section>
+
+      <div class="cta-wrap">
+        <button class="primary-cta" type="button">SUBSCRIBE NOW</button>
+        <p class="call-text">📞 Call us: +91 72309 20774</p>
+      </div>
+    </main>
+
+
+   <!-- CART/BAG: selected cart products, quantity, price panel -->
+   <main class="screen" id="orders-screen" data-screen="orders">
+
+  <header class="topbar">
+    <button class="icon-btn" data-go-screen="home">←</button>
+    <h1>Bag</h1>
+    <span class="topbar-spacer"></span>
+  </header>
+
+  <div class="cart-page-shell">
+    <div id="orders-container"></div>
+    <aside id="cart-price-panel"></aside>
+  </div>
+
+</main>
+
+    <!-- PRODUCTS: all dairy products category-wise list -->
+    <main class="screen" id="products-screen" data-screen="products">
+      <header class="topbar">
+        <button class="icon-btn" data-go-screen="home">←</button>
+        <h1>All Products</h1>
+        <span class="topbar-spacer"></span>
+      </header>
+
+      <div class="category-strip" role="tablist" aria-label="Product categories">
+        <button class="category-pill active" type="button" data-filter="all">All</button>
+        <button class="category-pill" type="button" data-filter="milk">MILK</button>
+        <button class="category-pill" type="button" data-filter="chaach">CHAACH</button>
+        <button class="category-pill" type="button" data-filter="ghee">GHEE</button>
+        <button class="category-pill" type="button" data-filter="dahi">DAHI</button>
+        <button class="category-pill" type="button" data-filter="paneer">PANEER</button>
+      </div>
+
+      <section class="products-page">
+        <div class="product-group" data-section="milk">
+          <h2>MILK</h2>
+          <div class="cards-grid three-up">
+            <article class="product-card">
+              <div class="product-visual">
+              <img src="images/BUFFALO MILK.png(2).png" alt="Milk">
+            </div>
+              <div class="product-body">
+                <h3>RAW BUFFALO MILK</h3>
+                <p>Creamy buffalo milk, rich and wholesome</p>
+                <div class="product-price-row">
+                  <strong>₹75/L</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-visual">
+              <img src="images/COW MILK.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>RAW COW <br>MILK</h3>
+              
+                <p>Pure cow's milk, fresh from farm to home</p>
+                <div class="product-price-row">
+                  <strong>₹51/L</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+            <article class="product-card">
+                <div class="product-visual">
+                <img src="images/A2 MILK.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>RAW A2 COW MILK</h3>
+                <p>A2 milk from Sahiwal cows, easy to digest</p>
+                <div class="product-price-row">
+                  <strong>₹85/L</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="product-group" data-section="chaach">
+          <h2>CHAACH</h2>
+          <div class="cards-grid two-up">
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/BUFFALO CHAACH.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>BUFFALO BILONA CHAACH</h3>
+                <p>Rich and tasty buttermilk, healthy drink</p>
+                <div class="product-price-row">
+                  <strong>₹40/L</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/COW CHAACH.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>COW BILONA CHAACH</h3>
+                <p>Traditional tangy buttermilk, refreshing</p>
+                <div class="product-price-row">
+                  <strong>₹35/L</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="product-group" data-section="ghee">
+          <h2>GHEE</h2>
+          <div class="cards-grid three-up">
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/buffalo ghee.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>BUFFALO GHEE</h3>
+                <p>Pure buffalo ghee, traditional strength & aroma</p>
+                <div class="product-price-row">
+                  <strong>₹1300/Kg</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/COWW GHEEE.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>COW GHEE</h3>
+                <p>Traditional cow ghee, rich aroma & authentic taste</p>
+                <div class="product-price-row">
+                  <strong>₹1100/Kg</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/A2 ghee.png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>RAW A2 COW GHEE</h3>
+                <p>Authentic A2 ghee, bilona method, superior quality</p>
+                <div class="product-price-row">
+                  <strong>₹2800/Kg</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="product-group" data-section="dahi">
+          <h2>DAHI</h2>
+          <div class="cards-grid single-up">
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/DAHI (1).png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>DAHI</h3>
+                <p>Thick homemade dahi, healthy & delicious</p>
+                <div class="product-price-row">
+                  <strong>₹72/500g</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="product-group" data-section="paneer">
+          <h2>PANEER</h2>
+          <div class="cards-grid single-up">
+            <article class="product-card">
+              <div class="product-visual">
+                <img src="images/paneer (1).png" alt="Milk">
+              </div>
+              <div class="product-body">
+                <h3>PANEER</h3>
+                <p>Soft and creamy, freshly prepared for your dishes</p>
+                <div class="product-price-row">
+                  <strong>₹450/Kg</strong>
+                  <span class="wishlist-heart">♡</span>
+                </div>
+                <button class="buy-btn">SUBSCRIBE</button>
+                
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- WISHLIST: saved products and wishlist category filters -->
+    <main class="screen" id="wishlist-screen" data-screen="wishlist">
+
+  <header class="topbar">
+    <button class="icon-btn" data-go-screen="profile">←</button>
+    <h1>Wishlist</h1>
+    <span class="topbar-spacer"></span>
+  </header>
+
+  <div class="category-strip wishlist-strip">
+
+  <button class="category-pill wishlist-filter active" data-wishlist="all">
+    All
+  </button>
+
+  <button class="category-pill wishlist-filter" data-wishlist="milk">
+    MILK
+  </button>
+
+  <button class="category-pill wishlist-filter" data-wishlist="chaach">
+    CHAACH
+  </button>
+
+  <button class="category-pill wishlist-filter" data-wishlist="ghee">
+    GHEE
+  </button>
+
+  <button class="category-pill wishlist-filter" data-wishlist="dahi">
+    DAHI
+  </button>
+
+  <button class="category-pill wishlist-filter" data-wishlist="paneer">
+    PANEER
+  </button>
+
+</div>
+
+  <div class="products-page">
+  <div class="cards-grid three-up" id="wishlist-container"></div>
+</div>
+    <!-- wishlist items yaha aayenge -->
+
+</main>
+
+   <!-- PRODUCT DETAIL: selected product image, plan, dates, slot, buy/cart buttons -->
+   <main class="screen" id="product-detail-screen" data-screen="productDetail">
+
+  <!-- TOP IMAGE -->
+  <!-- Detail ka upper area: back button + product image -->
+  <div class="detail-top">
+    <button class="back-btn" id="dynamic-back-btn">←</button>
+    <img id="detail-image" src="">
+  </div>
+
+  <!-- BOTTOM CARD -->
+  <!-- Detail ka lower area: name, price, plan, quantity, dates, buttons -->
+  <div class="detail-card">
+
+    <h2 id="detail-name">Product Name</h2>
+    <p id="detail-price">Price</p>
+
+    <!-- PLAN -->
+    <!-- Plan buttons: monthly, weekly, one time, customized -->
+    <div class="plan-box" id="planBox">
+      <p>Choose the Plan</p>
+      <div class="plan-options">
+        <button class="plan-pill">Monthly</button>
+        <button class="plan-pill">15 Days</button>
+        <button class="plan-pill">Weekly</button>
+        <button class="plan-pill">One Time Only</button>
+        <button class="plan-pill">Customised</button>
+      </div>
+    </div>
+
+    <!-- INPUTS -->
+    <!-- Quantity + packet count controls -->
+    <div class="input-row">
+
+  <!-- Quantity dropdown -->
+  <select id="quantity-select">
+    <option value="">Choose Quantity</option>
+    <option value="0.5">500 ml</option>
+    <option value="1">1 L</option>
+  </select>
+
+  <!-- Packet counter -->
+  <div class="packet-box">
+    <button id="minus">-</button>
+    <span id="packet-count">1</span>
+    <button id="plus">+</button>
+  </div>
+
+</div>
+
+   <!-- Start/end date selection -->
+   <div class="input-row date-row">
+  <label class="date-field" for="start-date">
+    <span class="date-placeholder">Start Date</span>
+    <input type="date" id="start-date" class="date-input" aria-label="Start Date">
+  </label>
+  <label class="date-field" for="end-date">
+    <span class="date-placeholder">End Date</span>
+    <input type="date" id="end-date" aria-label="End Date">
+  </label>
+</div>
+
+<!-- CUSTOM DATE BLOCKS -->
+<div id="custom-dates-wrap"></div>
+
+    <div class="input-row full">
+  <select id="slot-select">
+    <option value="">Choose Delivery Slot</option>
+    <option>Morning</option>
+    <option>Evening</option>
+  </select>
+</div>
+
+    <!-- BUTTONS -->
+    <button class="big-btn" id="buy-now-btn" disabled>
+  Buy Now
+</button>
+    <button class="big-btn" id="cart-btn" disabled>Add to Cart</button>
+
+    <h3 style="margin-top:20px;">Product Details</h3>
+
+<p id="product-description"
+   style="font-size:13px;
+   color:#777;
+   line-height:1.7;">
+</p>
+
+  </div>
+
+</main>
+
+<!-- DELIVERY CONTROLS: subscription pause, switch product, slot/address changes -->
+<main class="screen" id="delivery-controls-screen" data-screen="deliveryControls">
+  <div class="delivery-controls-shell">
+    <div class="delivery-controls-topbar">
+      <button class="delivery-back-btn" type="button" data-go-screen="home">&lt;</button>
+      <h1>Delivery Controls</h1>
+      <span></span>
+    </div>
+
+    <section class="delivery-product-hero">
+      <img id="dcProductImage" src="" alt="">
+    </section>
+
+    <!-- Existing subscription/product summary before making changes -->
+    <section class="delivery-summary-card" id="dcSummaryCard">
+      <div class="delivery-summary-main">
+        <img id="dcSummaryImage" src="" alt="">
+        <div>
+          <h2 id="dcSummaryName">Product Name</h2>
+          <p id="dcSummaryPrice">Price</p>
+        </div>
+      </div>
+      <div class="delivery-summary-grid">
+        <p><span>Plan</span><strong id="dcSummaryPlan">-</strong></p>
+        <p><span>Quantity</span><strong id="dcSummaryQuantity">-</strong></p>
+        <p><span>Packets</span><strong id="dcSummaryPackets">-</strong></p>
+        <p><span>Slot</span><strong id="dcSummarySlot">-</strong></p>
+        <p><span>Start</span><strong id="dcSummaryStart">-</strong></p>
+        <p><span>End</span><strong id="dcSummaryEnd">-</strong></p>
+      </div>
+      <div id="dcSummaryChanges" class="delivery-summary-changes"></div>
+    </section>
+
+    <!-- Pause delivery dates -->
+    <section class="delivery-control-card dc-subscription-only">
+      <h2><span>||</span> Pause Delivery</h2>
+      <label><input type="checkbox" name="dcPauseMode" value="tomorrow"> Tomorrow</label>
+      <label><input type="checkbox" name="dcPauseMode" value="date"> Select dates</label>
+      <input type="date" id="dcPauseDate" hidden>
+      <div id="dcPauseCalendar" class="dc-pause-calendar"></div>
+    </section>
+
+    <!-- Switch product for future delivery -->
+    <section class="delivery-control-card dc-subscription-only">
+      <h2><span>↻</span> Switch Product</h2>
+      <label><input type="checkbox" name="dcSwitchMode" value="tomorrow"> Tomorrow <b class="dc-option-pause-mark" data-dc-pause-indicator="tomorrow"></b></label>
+      <select id="dcSwitchProductTomorrow"></select>
+      <label><input type="checkbox" name="dcSwitchMode" value="date"> Select dates</label>
+      <input type="date" id="dcSwitchDate" hidden>
+      <div id="dcSwitchCalendar" class="dc-pause-calendar"></div>
+      <select id="dcSwitchProductDate"></select>
+    </section>
+
+    <!-- Change quantity for selected delivery date -->
+    <section class="delivery-control-card dc-subscription-only">
+      <h2><span>＋</span> Change Quantity</h2>
+      <label><input type="checkbox" name="dcQuantityMode" value="tomorrow"> Tomorrow <b class="dc-option-pause-mark" data-dc-pause-indicator="tomorrow"></b></label>
+      <select id="dcQuantityTomorrow">
+        <option value="1">1 packet</option>
+        <option value="2">2 packets</option>
+        <option value="3">3 packets</option>
+        <option value="4">4 packets</option>
+      </select>
+      <select id="dcQuantityTomorrowSize">
+        <option value="0.5L">0.5L</option>
+        <option value="1L">1L</option>
+      </select>
+      <label><input type="checkbox" name="dcQuantityMode" value="date"> Select date</label>
+      <input type="date" id="dcQuantityDate" hidden>
+      <div id="dcQuantityCalendar" class="dc-pause-calendar"></div>
+      <select id="dcQuantityDateValue">
+        <option value="1">1 packet</option>
+        <option value="2">2 packets</option>
+        <option value="3">3 packets</option>
+        <option value="4">4 packets</option>
+      </select>
+      <select id="dcQuantityDateSize">
+        <option value="0.5L">0.5L</option>
+        <option value="1L">1L</option>
+      </select>
+    </section>
+
+    <!-- Change delivery slot -->
+    <section class="delivery-control-card">
+      <h2><span>○</span> Change Slot</h2>
+      <label><input type="checkbox" name="dcSlotMode" value="tomorrow"> Tomorrow <b class="dc-option-pause-mark" data-dc-pause-indicator="tomorrow"></b></label>
+      <select id="dcSlotTomorrow">
+        <option>Morning</option>
+        <option>Evening</option>
+      </select>
+      <label><input type="checkbox" name="dcSlotMode" value="date"> Select dates</label>
+      <input type="date" id="dcSlotDate" hidden>
+      <div id="dcSlotCalendar" class="dc-pause-calendar"></div>
+      <select id="dcSlotDateValue">
+        <option>Morning</option>
+        <option>Evening</option>
+      </select>
+    </section>
+
+    <!-- Change/add delivery address for selected date -->
+    <section class="delivery-control-card">
+      <h2><span>📍</span> Change address</h2>
+      <label><input type="checkbox" name="dcAddressMode" value="tomorrow"> Tomorrow <b class="dc-option-pause-mark" data-dc-pause-indicator="tomorrow"></b></label>
+      <label><input type="checkbox" name="dcAddressMode" value="date"> Select dates</label>
+      <input type="date" id="dcAddressDate" hidden>
+      <div id="dcAddressCalendar" class="dc-pause-calendar"></div>
+      <select id="dcAddressSelect" class="dc-address-select"></select>
+      <button type="button" class="dc-add-address-btn" id="dcAddAddressBtn">Add New Address</button>
+      <div class="dc-address-form" id="dcAddressForm">
+        <button type="button" class="address-map-btn dc-address-map-btn" data-address-map-prefix="dcAddress" title="Open and verify this address on map">📍</button>
+        <p class="deliverable-note">DELIVERABLE IN PILANI i.e. (333031 ONLY)</p>
+        <input type="text" id="dcAddressName" placeholder="Name*" maxlength="40" autocomplete="off">
+        <input type="tel" id="dcAddressMobile" placeholder="Mobile No*" maxlength="10" inputmode="numeric" autocomplete="off">
+        <input type="text" id="dcAddressHouse" placeholder="House Number/Tower/Block*">
+        <input type="text" id="dcAddressStreet" placeholder="Address (locality, building, street)*">
+        <input type="text" id="dcAddressTown" placeholder="Locality / Town*">
+        <p class="address-map-note dc-address-map-note" data-address-map-note="dcAddress">Select on the map for more exact information</p>
+        <div class="dc-address-actions">
+          <button type="button" id="dcCancelAddressBtn">Cancel</button>
+          <button type="button" id="dcSaveAddressBtn">Save Address</button>
+        </div>
+      </div>
+    </section>
+
+    <button type="button" id="dcSaveChangesBtn" class="dc-save-btn" disabled>Save Changes</button>
+  </div>
+</main>
+
+<!-- CART ADDRESS: checkout ke liye delivery address choose/add/edit -->
+<main class="screen" id="cart-address-screen" data-screen="cartAddress">
+  <div class="cart-address-shell">
+    <section class="cart-address-main">
+      <div class="cart-address-head">
+        <div class="cart-address-title">
+          <button type="button" class="address-back-btn" data-go-screen="orders">←</button>
+          <h2>Select Delivery Address</h2>
+        </div>
+        <button type="button" id="cartAddAddressBtn">
+          ADD NEW ADDRESS
+        </button>
+      </div>
+
+      <div id="cartAddressFormWrap" class="cart-address-form-wrap">
+        <div class="address-form">
+          <p class="deliverable-note">DELIVERABLE IN PILANI i.e. (333031 ONLY)</p>
+          <h3>CONTACT DETAILS</h3>
+          <input type="text" id="cartAddressName" placeholder="Name*" maxlength="40" autocomplete="off">
+          <input type="tel" id="cartAddressMobile" placeholder="Mobile No*" maxlength="10" inputmode="numeric" autocomplete="off">
+
+          <div class="address-heading-row">
+            <h3>ADDRESS</h3>
+            <button type="button" class="address-map-btn" data-address-map-prefix="cartAddress" title="Open and verify this address on map">📍</button>
+          </div>
+          <input type="text" id="cartAddressPincode" value="333031" readonly style="background:#f0f0f0;color:#555;">
+          <input type="text" id="cartAddressHouse" placeholder="House Number/Tower/Block*">
+          <input type="text" id="cartAddressStreet" placeholder="Address (locality, building, street)*">
+          <input type="text" id="cartAddressTown" placeholder="Locality / Town*">
+          <p class="address-map-note" data-address-map-note="cartAddress">Select on the map for more exact information</p>
+
+          <div class="city-state-row">
+            <input type="text" id="cartAddressCity" value="Pilani" readonly style="background:#f0f0f0;color:#555;">
+            <input type="text" id="cartAddressState" value="Rajasthan" readonly style="background:#f0f0f0;color:#555;">
+          </div>
+
+          <div class="address-btn-row">
+            <button type="button" id="cartCancelAddressBtn">Cancel</button>
+            <button type="button" id="cartSaveAddressBtn">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="cartAddressList"></div>
+    </section>
+
+    <aside id="cartAddressSummary"></aside>
+  </div>
+</main>
+
+<!-- PAYMENT MODE: COD/UPI/card options and payment summary -->
+<main class="screen" id="payment-mode-screen" data-screen="paymentMode">
+  <header class="topbar">
+    <button class="icon-btn" data-go-screen="cartAddress">←</button>
+    <h1>Payment</h1>
+    <span class="topbar-spacer"></span>
+  </header>
+
+  <div class="payment-mode-wrap">
+    <h2 class="payment-mode-title">Choose Payment Mode</h2>
+
+    <div class="milkcash-row">
+      <label class="milkcash-check-wrap">
+        <input type="checkbox" id="milkcash-checkbox">
+        <span class="milkcash-checkmark"></span>
+      </label>
+
+      <div class="milkcash-info">
+        <p class="milkcash-title">Mr.MilkCash</p>
+        <p class="milkcash-sub">Total Active Mr.MilkCash: <span id="milkcash-balance">₹0</span></p>
+      </div>
+
+      <div class="milkcash-saved">
+        <p class="saved-label">You Saved</p>
+        <p class="saved-amount" id="milkcash-saved-amount">₹0</p>
+      </div>
+    </div>
+
+    <div class="payment-checkout-layout">
+      <section class="payment-main-panel">
+        <aside class="payment-method-tabs">
+          <button type="button" class="payment-method-tab active" data-payment-method="cod">
+            <span>Cash On Delivery<br>(Cash/UPI)</span>
+          </button>
+          <button type="button" class="payment-method-tab" data-payment-method="upi">
+            <span>UPI (Pay via any App)</span>
+          </button>
+          <button type="button" class="payment-method-tab payment-method-tab-soon" disabled aria-disabled="true">
+            <span>Credit/Debit Card</span>
+            <small>This feature is coming soon</small>
+          </button>
+        </aside>
+
+        <div id="paymentMethodContent" class="payment-method-content"></div>
+      </section>
+
+      <aside id="paymentCartSummary" class="payment-cart-summary"></aside>
+    </div>
+  </div>
+</main>
+
+<!-- UPI QR: UPI payment ke liye QR code screen -->
+<main class="screen" id="upi-qr-screen" data-screen="upiQr">
+  <div class="upi-qr-shell">
+    <aside class="upi-qr-side">
+      <div class="upi-qr-brand">
+        <img src="images/mr-milk-logo-cropped.png" alt="Mr.Milk logo">
+        <h2>Mr.Milk</h2>
+      </div>
+      <div class="upi-qr-total">
+        <span>Total</span>
+        <strong id="upiQrTotal">&#8377;0.00</strong>
+      </div>
+      <p>Powered by <strong>Paytm</strong></p>
+    </aside>
+
+    <section class="upi-qr-panel">
+      <div class="upi-qr-head">
+        <h2>Payment Options</h2>
+        <button type="button" data-go-screen="paymentMode">←</button>
+      </div>
+      <div class="upi-qr-body">
+        <div class="upi-qr-method">
+          <h3>UPI Payment</h3>
+          <div class="upi-qr-pill">
+            <strong>UPI</strong>
+            <span>Pay via UPI apps, number or ID</span>
+          </div>
+          <h3>Other Methods</h3>
+          <div class="upi-qr-other upi-qr-other-soon">
+            Debit/Credit Card
+            <small>This feature is coming soon</small>
+          </div>
+        </div>
+        <div class="upi-qr-card">
+          <h3>Scan via any UPI app</h3>
+          <img class="upi-payment-qr" id="upiQrImage" src="images/upi-payment-qr.png" alt="UPI payment QR code">
+          <div class="upi-qr-actions" id="upiQrActions" hidden>
+            <p>Pay from this phone</p>
+            <button type="button" class="upi-open-btn" data-upi-action="any">Open any UPI app</button>
+            <div class="upi-app-button-row">
+              <button type="button" data-upi-action="gpay">GPay</button>
+              <button type="button" data-upi-action="phonepe">PhonePe</button>
+              <button type="button" data-upi-action="paytm">Paytm</button>
+            </div>
+            <button type="button" class="upi-copy-btn" data-upi-copy>Copy payment link</button>
+          </div>
+          <p class="upi-qr-next-help" id="upiQrNextHelp">Scan the QR from any UPI app. After payment, keep this screen open while we confirm it.</p>
+          <button type="button" class="upi-check-btn" data-upi-check>I have paid</button>
+          <strong class="upi-qr-progress" id="upiQrProgress">Payment in progress</strong>
+          <p class="upi-qr-warning" id="upiQrWarning">Do not refresh or redirect while we verify your payment.</p>
+          <span id="upiQrTimer">This qr will expire in 01:20</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- PAYMENT SUCCESS: payment complete hone ke baad success message -->
+<main class="screen" id="payment-success-screen" data-screen="paymentSuccess">
+  <div class="login-container" style="text-align:center; padding-top:80px;">
+    <div style="margin-top:60px;">
+      <div class="success-tick">
+        <span class="tick-mark">✔</span>
+      </div>
+      <h1 class="success-sub">Payment</h1>
+      <h1 class="success-main">Successful!!!</h1>
+    </div>
+  </div>
+</main>
+
+</section>
+<!-- CHECKOUT: buy-now flow ka product summary and address form -->
+<main class="screen" id="checkout-screen" data-screen="checkout">
+
+  <header class="topbar">
+    <button class="icon-btn" data-go-screen="productDetail">←</button>
+
+    <h1>Checkout</h1>
+
+    <span class="topbar-spacer"></span>
+  </header>
+
+  <div id="checkout-container"></div>
+  <!-- ADDRESS SECTION -->
+
+<div class="address-wrapper">
+
+  <!-- TOGGLE -->
+  <div class="address-toggle" id="addressToggle">
+
+    <span>+ Add Address</span>
+
+    <span id="addressArrow">⌄</span>
+
+  </div>
+
+  <!-- FORM -->
+  <div class="address-form-wrap" id="addressFormWrap">
+
+    <div class="address-form">
+
+      <p class="deliverable-note">DELIVERABLE IN PILANI i.e. (333031 ONLY)</p>
+      <h3>CONTACT DETAILS</h3>
+
+      <input 
+  type="text"
+  id="addressName"
+  placeholder="Name*"
+  maxlength="40"
+  autocomplete="off"
+/>
+
+      <input
+  type="tel"
+  id="addressMobile"
+  placeholder="Mobile No*"
+  maxlength="10"
+  inputmode="numeric"
+  autocomplete="off"
+/>
+
+      <div class="address-heading-row">
+        <h3>ADDRESS</h3>
+        <button type="button" class="address-map-btn" data-address-map-prefix="address" title="Open and verify this address on map">📍</button>
+      </div>
+      <input type="text" id="addressPincode" value="333031" readonly style="background:#f0f0f0;color:#555;">
+
+      <input type="text" id="addressHouse" placeholder="House Number/Tower/Block*">
+
+      <input type="text" id="addressStreet" placeholder="Address (locality, building, street)*">
+
+      <input type="text" id="addressTown" placeholder="Locality / Town*">
+      <p class="address-map-note" data-address-map-note="address">Select on the map for more exact information</p>
+
+      <div class="city-state-row">
+
+        <input type="text" id="addressCity" value="Pilani" readonly style="background:#f0f0f0;color:#555;">
+
+        <input type="text" id="addressState" value="Rajasthan" readonly style="background:#f0f0f0;color:#555;">
+
+      </div>
+
+      <div class="address-btn-row">
+
+        <button type="button" id="cancelAddressBtn">
+          Cancel
+        </button>
+
+        <button type="button" id="saveAddressBtn">
+          Save
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SAVED ADDRESSES -->
+  <div id="savedAddresses"></div>
+
+  <button class="checkout-btn" id="proceedCheckoutBtn">Proceed to Checkout</button>
+
+</div>
+
+</main>
+    <!-- BOTTOM NAV: app ke main tabs - Home, Products, Cart, Profile -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-item active" data-go-screen="home">
+        <span class="nav-badge home-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h4.5v-5h4v5h4.5v-9.5"/></svg>
+        </span>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" data-go-screen="products">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11" rx="1.8"/><path d="M8 19.5h8"/></svg>
+        <span>Products</span>
+      </button>
+      <button class="nav-item cart-nav-btn" data-go-screen="orders">
+  <div class="nav-badge">
+    <svg viewBox="0 0 24 24"><path d="M3.5 4h2l2.2 9.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8l1.5-6.2H7.2"/></svg>
+
+    <!-- 🔥 ADD THIS -->
+    <span id="cart-count" class="badge small-badge">0</span>
+  </div>
+  <span>Cart</span>
+</button>
+      <button class="nav-item" data-go-screen="profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 20a6.5 6.5 0 0 0-13 0"/><circle cx="12" cy="8" r="4"/></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+    <!-- LOGOUT MODAL: profile se logout confirm karne ka popup -->
+    <div class="logout-modal" id="logoutModal">
+
+  <div class="modal-box">
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to log out?</p>
+
+    <div class="modal-actions">
+      <button class="yes-btn">Yes</button>
+      <button class="cancel-btn">Cancel</button>
+    </div>
+  </div>
+
+</div>
+    <!-- PAYMENT CANCEL MODAL: QR/payment cancel karne se pehle confirmation -->
+    <div class="payment-cancel-modal" id="paymentCancelModal">
+      <div class="modal-box">
+        <h3>Cancel Payment?</h3>
+        <p>Are you sure you want to cancel this payment?</p>
+
+        <div class="modal-actions">
+          <button class="payment-cancel-yes" type="button">Yes</button>
+          <button class="payment-cancel-no" type="button">No</button>
+        </div>
+      </div>
+    </div>
+    <!-- ORDER CANCEL MODAL: profile orders me product cancel confirmation -->
+    <div class="order-cancel-modal" id="orderCancelModal">
+      <div class="modal-box">
+        <h3>Cancel Product?</h3>
+        <p id="orderCancelMessage">Do you want to cancel this product?</p>
+
+        <div class="modal-actions">
+          <button class="order-cancel-yes" type="button">Yes</button>
+          <button class="order-cancel-no" type="button">No</button>
+        </div>
+    </div>
+  </div>
+  <div class="address-map-modal" id="addressMapModal">
+    <div class="address-map-card">
+      <div class="address-map-head">
+        <div>
+          <h3>Select Exact Location</h3>
+          <p>Typed address par pin set hoga. Pin drag/tap karke adjust karein.</p>
+        </div>
+        <button type="button" id="addressMapCloseBtn">×</button>
+      </div>
+      <div id="addressMapCanvas"></div>
+      <p class="address-map-selected" id="addressMapSelectedText">Location select karein...</p>
+      <div class="address-map-actions">
+        <button type="button" id="addressMapCancelBtn">Cancel</button>
+        <button type="button" id="addressMapUseBtn" disabled>Use This Location</button>
+      </div>
+    </div>
+  </div>
+  </div>
+<!-- PLAN MODAL: subscription plan features ka popup -->
+<div id="planModal" class="plan-modal">
+  <div class="plan-modal-card">
+
+    <h2 id="planTitle">Monthly Subscription Plan</h2>
+
+    <ul id="planFeatures">
+      <li>Slot customization</li>
+      <li>Category and Product Switch</li>
+      <li>Dynamic Pricing</li>
+      <li>Start Date Selection</li>
+      <li>Pause Feature</li>
+      <li>Refund Policy</li>
+    </ul>
+
+    <button class="plan-btn"> Explore Products </button>
+
+  </div>
+</div>
+  <!-- TOAST: chhote success/error messages yaha show hote hain -->
+  <div id="toast"></div>
+  <!-- SCRIPTS: Supabase connection and app logic load hota hai -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./Supabase.js?v=20260529"></script>
+  <script src="./script.js?v=20260623-milk-wave-clean"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch(console.log);
+      });
+    }
+  </script>
+</body>
+</html>
