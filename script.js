@@ -166,7 +166,7 @@ const didUndoJune26Pause = undoSavedPauseForJune26();
     let razorpayPaymentPollInFlight = false;
     let upiAutoRedirectTimer = null;
     const MR_MILK_UPI_CONFIG = {
-      payeeVpa: "",
+      payeeVpa: "7230920774@ptyes",
       payeeName: "M R MILK",
       transactionNote: "M.R Milk order payment"
     };
@@ -629,9 +629,14 @@ function scheduleUpiAutoRedirect() {
     upiAutoRedirectTimer = null;
   }
 
-  if (!isLikelyMobileDevice() || !activeRazorpayAttempt?.actionUrl || activeRazorpayAttempt.autoRedirected) return;
+  if (!activeRazorpayAttempt?.actionUrl || activeRazorpayAttempt.autoRedirected) return;
+  if (!isLikelyMobileDevice()) {
+    updateRazorpayQrMessage("Scan to pay", "Open this checkout on your phone for automatic UPI redirect, or scan this QR from any UPI app.");
+    return;
+  }
 
   activeRazorpayAttempt.autoRedirected = true;
+  updateRazorpayQrMessage("Redirecting to UPI app", "Complete the payment in your UPI app, then return here for confirmation.");
   upiAutoRedirectTimer = setTimeout(() => {
     openRazorpayUpiAction("UPI app", "any");
   }, 450);
@@ -707,14 +712,20 @@ function findRazorpayPaymentActionUrl(data) {
 function renderUpiQrActions() {
   const actionsEl = document.getElementById('upiQrActions');
   const helpEl = document.getElementById('upiQrNextHelp');
+  const redirectTextEl = document.getElementById('upiQrRedirectText');
   const actionUrl = activeRazorpayAttempt?.actionUrl || "";
   const hasActionUrl = Boolean(actionUrl);
 
   if (actionsEl) actionsEl.hidden = !hasActionUrl;
+  if (redirectTextEl) {
+    redirectTextEl.textContent = isLikelyMobileDevice()
+      ? "Opening your UPI app automatically..."
+      : "Automatic UPI redirect is ready on phone.";
+  }
   if (helpEl) {
     helpEl.textContent = hasActionUrl
-      ? "Same phone se pay karne ke liye Open any UPI app tap karein, payment complete karein, phir yaha wapas aa jaayein."
-      : "Same phone par QR scan nahi hota. Dusre phone se scan karein, ya backend se UPI intent/payment link enable karein.";
+      ? "UPI app me payment complete karein, phir yaha wapas aa jaayein. Hum payment verify kar denge."
+      : "Automatic redirect ke liye Razorpay response me UPI intent/payment link chahiye. Abhi QR ko dusre device se scan karein.";
   }
 }
 
@@ -742,6 +753,21 @@ function updateRazorpayQrMessage(title, message) {
   if (warningEl) warningEl.textContent = message;
 }
 
+function startDirectUpiPayment(actionUrl, amount) {
+  if (!actionUrl) return false;
+
+  activeRazorpayAttempt = {
+    attemptId: `upi-${Date.now()}`,
+    imageUrl: normalizeAssetPath("images/upi-payment-qr.png"),
+    actionUrl,
+    expiresAt: new Date(Date.now() + 3 * 60 * 1000).toISOString(),
+    amount,
+    isDirectUpi: true
+  };
+  setActiveScreen('upiQr');
+  return true;
+}
+
 function stopRazorpayPaymentPolling() {
   if (razorpayPaymentPollTimer) {
     clearInterval(razorpayPaymentPollTimer);
@@ -760,18 +786,7 @@ async function startRazorpayQrPayment() {
 
   const configuredUpiUrl = getConfiguredMerchantUpiUrl(amount);
   if (!sb?.functions?.invoke) {
-    if (configuredUpiUrl) {
-      activeRazorpayAttempt = {
-        attemptId: `upi-${Date.now()}`,
-        imageUrl: normalizeAssetPath("images/upi-payment-qr.png"),
-        actionUrl: configuredUpiUrl,
-        expiresAt: new Date(Date.now() + 3 * 60 * 1000).toISOString(),
-        amount,
-        isDirectUpi: true
-      };
-      setActiveScreen('upiQr');
-      return true;
-    }
+    if (startDirectUpiPayment(configuredUpiUrl, amount)) return true;
     showToast("Online payment setup pending. Please choose COD for now.");
     return false;
   }
@@ -794,6 +809,7 @@ async function startRazorpayQrPayment() {
 
     if (error || !data?.attemptId || !data?.imageUrl) {
       console.log("Razorpay QR create failed", error || data);
+      if (startDirectUpiPayment(configuredUpiUrl, amount)) return true;
       showToast("Online payment setup pending. Please choose COD for now.");
       return false;
     }
@@ -811,18 +827,7 @@ async function startRazorpayQrPayment() {
     return true;
   } catch (error) {
     console.log("Razorpay QR create failed", error);
-    if (configuredUpiUrl) {
-      activeRazorpayAttempt = {
-        attemptId: `upi-${Date.now()}`,
-        imageUrl: normalizeAssetPath("images/upi-payment-qr.png"),
-        actionUrl: configuredUpiUrl,
-        expiresAt: new Date(Date.now() + 3 * 60 * 1000).toISOString(),
-        amount,
-        isDirectUpi: true
-      };
-      setActiveScreen('upiQr');
-      return true;
-    }
+    if (startDirectUpiPayment(configuredUpiUrl, amount)) return true;
     showToast("Online payment setup pending. Please choose COD for now.");
     return false;
   }
@@ -897,22 +902,6 @@ function openRazorpayUpiAction(appName = "UPI app", app = "any") {
 
   updateRazorpayQrMessage("Waiting for payment", `Complete the payment in ${appName}, then return here.`);
   window.location.href = getUpiActionUrlForApp(actionUrl, app);
-}
-
-async function copyRazorpayPaymentActionUrl() {
-  const actionUrl = activeRazorpayAttempt?.actionUrl || "";
-  if (!actionUrl) {
-    showToast("Payment link is not available. Please scan the QR.");
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(actionUrl);
-    showToast("Payment link copied");
-  } catch (error) {
-    console.log("Payment link copy failed", error);
-    showToast("Could not copy payment link");
-  }
 }
 
 function showPaymentSuccessScreen() {
@@ -1297,26 +1286,6 @@ document.addEventListener('click', (event) => {
 
   if (event.target.closest('[data-upi-pay]')) {
     startRazorpayQrPayment();
-    return;
-  }
-
-  const upiActionBtn = event.target.closest('[data-upi-action]');
-  if (upiActionBtn) {
-    event.preventDefault();
-    const appLabels = {
-      any: "UPI app",
-      gpay: "GPay",
-      phonepe: "PhonePe",
-      paytm: "Paytm"
-    };
-    const app = upiActionBtn.dataset.upiAction || "any";
-    openRazorpayUpiAction(appLabels[app] || "UPI app", app);
-    return;
-  }
-
-  if (event.target.closest('[data-upi-copy]')) {
-    event.preventDefault();
-    copyRazorpayPaymentActionUrl();
     return;
   }
 

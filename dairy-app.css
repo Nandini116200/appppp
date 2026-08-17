@@ -6661,16 +6661,6 @@ button {
   font-weight:900;
 }
 
-.upi-app-button-row{
-  display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
-  gap:8px;
-  margin-top:10px;
-}
-
-.upi-app-button-row button,
-.upi-open-btn,
-.upi-copy-btn,
 .upi-check-btn{
   min-height:40px;
   border:0;
@@ -6680,32 +6670,6 @@ button {
   font-size:12px;
   font-weight:900;
   cursor:pointer;
-}
-
-.upi-open-btn{
-  width:100%;
-  margin-top:10px;
-  background:#0f766e;
-}
-
-.upi-app-button-row button:nth-child(1){
-  background:#1a73e8;
-}
-
-.upi-app-button-row button:nth-child(2){
-  background:#5f259f;
-}
-
-.upi-app-button-row button:nth-child(3){
-  background:#00baf2;
-}
-
-.upi-copy-btn{
-  width:100%;
-  margin-top:8px;
-  border:1px solid #cbd5e1;
-  background:#fff;
-  color:#0f172a;
 }
 
 .upi-check-btn{
